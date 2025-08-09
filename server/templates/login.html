@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURA | Login</title>
+  <link rel="shortcut icon" href="icon.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background-color: #000;
+      color: white;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .step {
+      width: 100%;
+      animation: fadeIn 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .input-wrapper .fa-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      pointer-events: none;
+      font-size: 18px;
+    }
+
+    input {
+      padding: 12px 12px 12px 38px;
+      background-color: #111;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 8px;
+      outline: none;
+      width: 100%;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #5599ff;
+      box-shadow: 0 0 5px #5599ff;
+    }
+
+    input.error {
+      border-color: red;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #222;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    button:disabled {
+      background-color: #111;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .lang-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .register-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    .register-link a {
+      color: #5599ff;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      display: none;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .success {
+      display: none;
+      font-size: 18px;
+      text-align: center;
+      color: #4CAF50;
+    }
+
+    .success.active {
+      display: block;
+    }
+
+    #errorBox {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255, 50, 50, 0.95);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
+
+    #errorBox.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="lang-btn" onclick="toggleLang()">🌐</button>
+  <div class="container">
+    <svg class="logo" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85 350 C85 300, 105 280, 125 270 C120 260, 130 250, 140 255 C135 245, 145 235, 155 240 C150 220, 160 200, 180 190 C170 180, 175 160, 190 170 C185 150, 200 140, 210 150 C200 130, 220 120, 230 140 C225 100, 250 90, 260 120 C255 80, 280 70, 290 110 C285 60, 320 50, 330 100 C320 40, 360 30, 370 90 L370 120 C365 180, 350 220, 320 250 C290 280, 250 300, 200 320 C150 340, 85 350, 85 350 Z" fill="url(#redGradient)"/>
+      <path d="M200 250 C200 200, 220 180, 240 170 C235 160, 245 150, 255 155 C250 145, 260 135, 270 140 C265 120, 275 100, 295 90 C285 80, 290 60, 305 70 C300 50, 315 40, 325 50 C315 30, 335 20, 345 40 C340 0, 365 -10, 375 20 C370 -20, 395 -30, 405 10 C400 -40, 435 -50, 445 0 C435 -60, 475 -70, 485 -10 L485 20 C480 80, 465 120, 435 150 C405 180, 365 200, 315 220 C265 240, 200 250, 200 250 Z" fill="url(#purpleGradient)"/>
+      <path d="M315 350 C315 300, 335 280, 355 270 C350 260, 360 250, 370 255 C365 245, 375 235, 385 240 C380 220, 390 200, 410 190 C400 180, 405 160, 420 170 C415 150, 430 140, 440 150 C430 130, 450 120, 460 140 C455 100, 480 90, 490 120 C485 80, 510 70, 520 110 C515 60, 550 50, 560 100 C550 40, 590 30, 600 90 L600 120 C595 180, 580 220, 550 250 C520 280, 480 300, 430 320 C380 340, 315 350, 315 350 Z" fill="url(#blueGradient)"/>
+      <defs>
+        <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#ff3333;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#ff6600;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#8B1A89;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#B91C8C;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="step active" id="step-1">
+      <label id="label-login">Введите логин или email</label>
+      <div class="input-wrapper">
+        <i class="fa-solid fa-user fa-icon"></i>
+        <input type="text" id="loginInput" autocomplete="off" />
+      </div>
+      <button onclick="submitForm()" id="loginBtn">Войти</button>
+      <div class="register-link">
+        <span id="noAccount">Нет аккаунта?</span>
+        <a href="/register" id="registerLink">Зарегистрироваться</a>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">Выполняется вход...</div>
+    <div class="success" id="success">Вход выполнен! Перенаправление...</div>
+  </div>
+
+  <div id="errorBox"></div>
+
+  <script>
+    let lang = "ru";
+    const errorBox = document.getElementById("errorBox");
+
+    const translations = {
+      ru: {
+        loginLabel: "Введите логин или email",
+        loginBtn: "Войти",
+        noAccount: "Нет аккаунта?",
+        registerLink: "Зарегистрироваться",
+        emptyLogin: "Логин или email не может быть пустым",
+        serverError: "Ошибка сервера",
+        loading: "Выполняется вход...",
+        success: "Вход выполнен! Перенаправление..."
+      },
+      en: {
+        loginLabel: "Enter login or email",
+        loginBtn: "Login",
+        noAccount: "No account?",
+        registerLink: "Register",
+        emptyLogin: "Login or email cannot be empty",
+        serverError: "Server error",
+        loading: "Logging in...",
+        success: "Login successful! Redirecting..."
+      }
+    };
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+      setTimeout(() => {
+        errorBox.classList.remove("show");
+      }, 3000);
+    }
+
+    function updateLang() {
+      document.getElementById("label-login").textContent = translations[lang].loginLabel;
+      document.getElementById("loginBtn").textContent = translations[lang].loginBtn;
+      document.getElementById("noAccount").textContent = translations[lang].noAccount;
+      document.getElementById("registerLink").textContent = translations[lang].registerLink;
+      document.getElementById("loading").textContent = translations[lang].loading;
+      document.getElementById("success").textContent = translations[lang].success;
+    }
+
+    function toggleLang() {
+      lang = lang === "ru" ? "en" : "ru";
+      updateLang();
+    }
+
+    async function submitForm() {
+      const loginInput = document.getElementById("loginInput");
+      const loginValue = loginInput.value.trim();
+
+      if (loginValue === "") {
+        loginInput.classList.add("error");
+        loginInput.focus();
+        showError(translations[lang].emptyLogin);
+        return;
+      }
+
+      loginInput.classList.remove("error");
+      document.getElementById("loading").classList.add("active");
+
+      document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ login: loginValue })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("loading").classList.remove("active");
+          document.getElementById("success").classList.add("active");
+
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1500);
+        } else {
+          throw new Error(data.error || translations[lang].serverError);
+        }
+      } catch (error) {
+        document.getElementById("loading").classList.remove("active");
+        showError(error.message || translations[lang].serverError);
+        document.querySelectorAll("button").forEach(btn => btn.disabled = false);
+        loginInput.focus();
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitForm();
+      }
+    });
+
+    // Инициализация
+    updateLang();
+    document.getElementById("loginInput").focus();
+  </script>
+</body>
+</html>
